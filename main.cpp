@@ -29,6 +29,8 @@
 #include <vector>
 #include <scg3.h>
 
+#include "maze.h"
+
 using namespace scg;
 
 /**
@@ -67,6 +69,10 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene);
 int main() {
 
 	int result = 0;
+
+	printf("%i", maze::COLS);
+	maze::Maze maze1 = maze::generateMaze();
+	maze::printMaze(maze1);
 
 	try {
 		if (SCGConfiguration::viewerType == 0) {
@@ -426,6 +432,6 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	ceilingTrans->addChild(ceiling);
 	tableTrans->addChild(table)->addChild(teapotTrans);
 	teapotTrans->addChild(animation);
-	animation->addChild(teapot);dina
+	animation->addChild(teapot);
 	viewer->addAnimation(animation);
 }
