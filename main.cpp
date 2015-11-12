@@ -414,11 +414,6 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 		animation->rotate(angularVel * static_cast<GLfloat>(diffTime), axis);
 	});
 
-	//OBJ
-	auto cessnaCore = geometryFactory.createModelFromOBJFile("/home/shadoka/workspace_cgi/scg3/scg3/models/cessna.obj");
-	auto cessna = Shape::create(cessnaCore);
-	cessna->addCore(matRed);
-
 	// create scene graph
 	scene = Group::create();
 	scene->addCore(shaderPhong);
@@ -426,8 +421,7 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	light->addChild(floorTrans)
 			->addChild(tableTrans)
 			->addChild(walls)
-			->addChild(ceilingTrans)
-			->addChild(cessna);
+			->addChild(ceilingTrans);
 	floorTrans->addChild(floor);
 	ceilingTrans->addChild(ceiling);
 	tableTrans->addChild(table)->addChild(teapotTrans);
