@@ -30,6 +30,7 @@
 #include <scg3.h>
 
 #include "maze.h"
+#include "cell.h"
 
 using namespace scg;
 
@@ -39,7 +40,7 @@ using namespace scg;
 struct SCGConfiguration {
 	static const int viewerType = 1;  // 0: simple, 1: customized
 	// for customized viewer:
-	static const int sceneType = 1;   // 0: teapot, 1: table
+	static const int sceneType = 2;   // 0: teapot, 1: table
 };
 
 /**
@@ -64,15 +65,16 @@ void createTeapotScene(ViewerSP viewer, CameraSP camera, GroupSP& scene);
 void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene);
 
 /**
+ * Test.
+ */
+void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene);
+
+/**
  * \brief The main function.
  */
 int main() {
 
 	int result = 0;
-
-	printf("%i", maze::COLS);
-	maze::Maze maze1 = maze::generateMaze();
-	maze::printMaze(maze1);
 
 	try {
 		if (SCGConfiguration::viewerType == 0) {
@@ -134,6 +136,9 @@ void useCustomizedViewer() {
 	case 1:
 		createTableScene(viewer, camera, scene);
 		break;
+	case 2:
+		createMazeScene(viewer, camera, scene);
+		break;
 	default:
 		throw std::runtime_error(
 				"Invalid value of SCGConfiguration::sceneType [main()]");
@@ -144,9 +149,59 @@ void useCustomizedViewer() {
 	viewer->startAnimations()->startMainLoop();
 }
 
+void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
+	ShaderCoreFactory shaderFactory("resources/shaders");
+
+#ifdef SCG_CPP11_INITIALIZER_LISTS
+
+	auto shaderPhong = shaderFactory.createShaderFromSourceFiles(
+				{ ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER), ShaderFile(
+						"phong_frag.glsl", GL_FRAGMENT_SHADER), ShaderFile(
+						"blinn_phong_lighting.glsl", GL_FRAGMENT_SHADER),
+						ShaderFile("texture_none.glsl", GL_FRAGMENT_SHADER) });
+
+	// Gouraud shader
+	auto shaderGouraud = shaderFactory.createShaderFromSourceFiles( {
+			ShaderFile("simple_gouraud_vert.glsl", GL_VERTEX_SHADER),
+			ShaderFile("simple_gouraud_frag.glsl", GL_FRAGMENT_SHADER) });
+#else
+	std::vector<ShaderFile> shaderFiles;
+	shaderFiles.push_back(ShaderFile("simple_gouraud_vert.glsl", GL_VERTEX_SHADER));
+	shaderFiles.push_back(ShaderFile("simple_gouraud_frag.glsl", GL_FRAGMENT_SHADER));
+	auto shaderGouraud = shaderFactory.createShaderFromSourceFiles(shaderFiles);
+#endif
+
+	// camera controllers
+	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(-1.f);
+#ifdef SCG_CPP11_INITIALIZER_LISTS
+	viewer->addControllers( { KeyboardController::create(camera),
+			MouseController::create(camera) });
+#else
+	viewer->addController(KeyboardController::create(camera))
+	->addController(MouseController::create(camera));
+#endif
+
+	maze::Maze maze1 = maze::generateMaze();
+
+	auto light = Light::create();
+	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))->setPosition(
+				glm::vec4(10.0f, 10.f, 10.0f, 1.f))->init();
+
+	auto mazeScene = Group::create();
+	mazeScene->addCore(shaderPhong);
+	mazeScene->addChild(camera)->addChild(light);
+	for (int i = 0; i < maze::ROWS / 2; i++) {
+		for (int j = 0; j < maze::COLS / 2; j++) {
+			light->addChild(cell::createCell(i, j, maze1));
+		}
+	}
+
+	scene = mazeScene;
+}
+
 void createTeapotScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 
-	ShaderCoreFactory shaderFactory("../scg3/shaders;../../scg3/shaders");
+	ShaderCoreFactory shaderFactory("resources/shaders");
 
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	// Gouraud shader
@@ -203,9 +258,10 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 	float wallThickness = 0.2f;
 	float wallHeight = 5.0f;
 
-	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures;resources/textures");
+	TextureCoreFactory textureFactory(
+			"../scg3/textures;../../scg3/textures;resources/textures");
 	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
-			GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR);
+	GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR);
 
 	auto wallGroup = Group::create();
 	wallGroup->addCore(shaderPhongTex)->addCore(matWhite)->addCore(texBrick);
@@ -239,8 +295,11 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 		float doorLength = 2.0f;
 		float doorHeight = 3.0f;
 		float doorThickness = 0.1f;
-		auto doorSideCore = geometryFactory.createCuboid(glm::vec3((floorX - doorLength) / 2.0f, wallHeight, wallThickness));
-		auto doorTopCore = geometryFactory.createCuboid(glm::vec3(doorLength, wallHeight - doorHeight, wallThickness));
+		auto doorSideCore = geometryFactory.createCuboid(
+				glm::vec3((floorX - doorLength) / 2.0f, wallHeight,
+						wallThickness));
+		auto doorTopCore = geometryFactory.createCuboid(
+				glm::vec3(doorLength, wallHeight - doorHeight, wallThickness));
 		ShapeSP walls[6];
 		TransformationSP wallsTrans[6];
 		for (int i = 0; i < 6; i++) {
@@ -262,9 +321,9 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 		wallsTrans[2]->translate(glm::vec3(5.5f, 2.0f, -5.0f));
 		wallsTrans[3]->translate(glm::vec3(0.0f, 3.5f, -5.0f));
 		wallsTrans[4]->translate(glm::vec3(10.0f, 2.0f, 0.0f))->rotate(90.0f,
-						glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3(0.0f, 1.0f, 0.0f));
 		wallsTrans[5]->translate(glm::vec3(-10.0f, 2.0f, 0.0f))->rotate(90.0f,
-						glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 	return wallGroup;
@@ -286,7 +345,8 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 //}
 
 void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
-	ShaderCoreFactory shaderFactory("../scg3/shaders;../../scg3/shaders;../scg3/scg3/shaders");
+	ShaderCoreFactory shaderFactory(
+			"../scg3/shaders;../../scg3/shaders;../scg3/scg3/shaders");
 
 	float floorX = 20.0f;
 	float floorY = 0.05f;
@@ -301,14 +361,12 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 					ShaderFile("texture_none.glsl", GL_FRAGMENT_SHADER) });
 
 	// Phong shader with texture mapping
-	auto shaderPhongTex =
-			shaderFactory.createShaderFromSourceFiles(
-					{ ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER),
-							ShaderFile("phong_frag.glsl", GL_FRAGMENT_SHADER),
-							ShaderFile("blinn_phong_lighting.glsl",
-									GL_FRAGMENT_SHADER), ShaderFile(
-									"texture2d_modulate.glsl",
-									GL_FRAGMENT_SHADER) });
+	auto shaderPhongTex = shaderFactory.createShaderFromSourceFiles(
+			{ ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER), ShaderFile(
+					"phong_frag.glsl", GL_FRAGMENT_SHADER), ShaderFile(
+					"blinn_phong_lighting.glsl",
+					GL_FRAGMENT_SHADER), ShaderFile("texture2d_modulate.glsl",
+			GL_FRAGMENT_SHADER) });
 #else
 	// Phong shader
 	std::vector<ShaderFile> shaderFiles;
@@ -358,17 +416,18 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 			glm::vec4(0.5f, 0.5f, 0.5f, 1.f))->setShininess(20.f)->init();
 
 	// textures
-	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures;resources/textures");
+	TextureCoreFactory textureFactory(
+			"../scg3/textures;../../scg3/textures;resources/textures");
 	auto texWood = textureFactory.create2DTextureFromFile("wood_256.png",
-			GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	// set texture matrix
 //  texWood->scale2D(glm::vec2(4.f, 4.f));
 
 	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
-			GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
 	auto texFloor = textureFactory.create2DTextureFromFile("parquee.png",
-			GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
 	// floor shape and transformation
 	GeometryCoreFactory geometryFactory;
@@ -429,22 +488,17 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	auto animation = TransformAnimation::create();
 	float angularVel = 50.0f;
 	glm::vec3 axis(0.0f, 0.0f, 1.0f);
-	animation->setUpdateFunc(
-			[angularVel, axis](TransformAnimation* animation,
-                        double currTime, double diffTime, double totalTime) {
+	animation->setUpdateFunc([angularVel, axis](TransformAnimation* animation,
+			double currTime, double diffTime, double totalTime) {
 		animation->rotate(angularVel * static_cast<GLfloat>(diffTime), axis);
 	});
-
-
 
 	// create scene graph
 	scene = Group::create();
 	scene->addCore(shaderPhong);
 	scene->addChild(camera)->addChild(light);
-	light->addChild(floorTrans)
-			->addChild(tableTrans)
-			->addChild(walls)
-			->addChild(ceilingTrans);
+	light->addChild(floorTrans)->addChild(tableTrans)->addChild(walls)->addChild(
+			ceilingTrans);
 	floorTrans->addChild(floor);
 	ceilingTrans->addChild(ceiling);
 	tableTrans->addChild(table)->addChild(teapotTrans);

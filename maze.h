@@ -4,8 +4,8 @@
 #import <array>
 
 // this sucks, but is the most convenient way for now
-const int ROWS = 4;
-const int COLS = 4;
+const int ROWS = 64;
+const int COLS = 64;
 
 const int NORTH = 1;
 const int EAST = 2;
