@@ -1,8 +1,8 @@
 #include <scg3.h>
-#include "maze"
+#include "maze.h"
 
-GroupSP createCell(int col, int row, Maze maze) {
-	GroupSP cell;
+scg::GroupSP createCell(int col, int row, Maze maze) {
+	scg::GroupSP cell;
 
 	return cell;
 }

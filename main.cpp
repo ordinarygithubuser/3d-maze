@@ -270,6 +270,21 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 	return wallGroup;
 }
 
+//void dummy() {
+//	Maze maze = generateMaze();
+//		GroupSP quad1;
+//		LightSP light1;
+//		for (int i = 0; i < maze::ROWS / 2; i++) {
+//			for (int j = 0; j < maze::COLS / 2; j++) {
+//				quad1.addChild(createCells(i, j, maze));
+//			}
+//		}
+//		GroupSP mazeGroup;
+//		mazeGroup.addChild(light1);
+//		light1.addChild(quad1);
+//		...
+//}
+
 void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	ShaderCoreFactory shaderFactory("../scg3/shaders;../../scg3/shaders;../scg3/scg3/shaders");
 
@@ -419,6 +434,8 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
                         double currTime, double diffTime, double totalTime) {
 		animation->rotate(angularVel * static_cast<GLfloat>(diffTime), axis);
 	});
+
+
 
 	// create scene graph
 	scene = Group::create();
