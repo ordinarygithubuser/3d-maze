@@ -197,7 +197,7 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 	float wallThickness = 0.2f;
 	float wallHeight = 5.0f;
 
-	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures");
+	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures;resources/textures");
 	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
 			GL_REPEAT, GL_REPEAT, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR);
 
@@ -265,7 +265,7 @@ GroupSP createWalls(float floorX, float floorZ, ShaderCoreSP shaderPhongTex,
 }
 
 void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
-	ShaderCoreFactory shaderFactory("../scg3/shaders;../../scg3/shaders");
+	ShaderCoreFactory shaderFactory("../scg3/shaders;../../scg3/shaders;../scg3/scg3/shaders");
 
 	float floorX = 20.0f;
 	float floorY = 0.05f;
@@ -337,7 +337,7 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 			glm::vec4(0.5f, 0.5f, 0.5f, 1.f))->setShininess(20.f)->init();
 
 	// textures
-	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures");
+	TextureCoreFactory textureFactory("../scg3/textures;../../scg3/textures;resources/textures");
 	auto texWood = textureFactory.create2DTextureFromFile("wood_256.png",
 			GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	// set texture matrix
