@@ -20,6 +20,7 @@ struct Maze {
 
 // header
 Maze generateMaze();
+bla(Maze maze);
 void printMaze(Maze maze);
 int getColDiff(int dir);
 int getRowDiff(int dir);
