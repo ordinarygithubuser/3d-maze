@@ -426,6 +426,6 @@ void createTableScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	ceilingTrans->addChild(ceiling);
 	tableTrans->addChild(table)->addChild(teapotTrans);
 	teapotTrans->addChild(animation);
-	animation->addChild(teapot);
+	animation->addChild(teapot);dina
 	viewer->addAnimation(animation);
 }
