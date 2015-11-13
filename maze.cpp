@@ -8,9 +8,9 @@
 Maze generateMaze () {
 	srand(time(NULL));
 	Maze m = {{{0}}};
-	int remaining = COLS * ROWS - 1;
-	int row = rand() % ROWS;
-	int col = rand() % COLS;
+	int remaining = MAZE_SIZE * MAZE_SIZE - 1;
+	int row = rand() % MAZE_SIZE;
+	int col = rand() % MAZE_SIZE;
 
 	while (remaining > 0) {
 		// Random direction (drunk walk!)
@@ -22,7 +22,7 @@ Maze generateMaze () {
 			int nCol = col + getColDiff(dir);
 
 			// Is this node inside of the maze?
-			if (nRow > -1 && nRow < ROWS && nCol > -1 && nCol < COLS) {
+			if (nRow > -1 && nRow < MAZE_SIZE && nCol > -1 && nCol < MAZE_SIZE) {
 				// Only mark this, if we were not here
 				if (m.array[nRow][nCol] == 0) {
 					m.array[row][col] = dir;
@@ -39,8 +39,8 @@ Maze generateMaze () {
 }
 
 void printMaze (Maze m) {
-	for (int i = 0; i < ROWS; i++) {
-		for (int j = 0; j < COLS; j++) {
+	for (int i = 0; i < MAZE_SIZE; i++) {
+		for (int j = 0; j < MAZE_SIZE; j++) {
 			printf("p(%i, %i) = %s\r", i, j, getName(m.array[i][j]));
 		}
 	}

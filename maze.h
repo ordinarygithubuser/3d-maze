@@ -4,8 +4,7 @@
 #import <array>
 
 // this sucks, but is the most convenient way for now
-const int ROWS = 64;
-const int COLS = 64;
+const int MAZE_SIZE = 64;
 
 const int NORTH = 1;
 const int EAST = 2;
@@ -15,7 +14,7 @@ const int WEST = 4;
 const std::array<int, 4> MAZE_DIRECTIONS = { NORTH, EAST, SOUTH, WEST};
 
 struct Maze {
-	int array[ROWS][COLS];
+	int array[MAZE_SIZE][MAZE_SIZE];
 };
 
 // header

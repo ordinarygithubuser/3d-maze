@@ -10,14 +10,16 @@ scg3.
 
 ## maze algorithm
 
-TODO
+TODO explain Almut / Broder algorithm and maze structure
 
 ## maze rendering
 
-TODO
+TODO explain maze and cell creation / quadrant groups
 
 ## collision detection
 
+TODO explain it as soon as you figured it out
+
 ## shadow and reflections
 
-TODO
+TODO explain used models
