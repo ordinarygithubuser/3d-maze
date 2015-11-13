@@ -23,3 +23,4 @@ TODO explain it as soon as you figured it out
 ## shadow and reflections
 
 TODO explain used models
+TODO choose shadow model
