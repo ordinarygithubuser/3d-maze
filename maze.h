@@ -4,7 +4,7 @@
 #import <array>
 
 // this sucks, but is the most convenient way for now
-const int MAZE_SIZE = 64;
+const int MAZE_SIZE = 8;
 
 const int NORTH = 1;
 const int EAST = 2;

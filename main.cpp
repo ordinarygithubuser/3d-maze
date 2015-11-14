@@ -58,7 +58,7 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	auto shaderGouraud = shaderFactory.createShaderFromSourceFiles(shaderFiles);
 #endif
 	// camera controllers
-	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(-1.f);
+	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(0.f);
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	viewer->addControllers({
 		KeyboardController::create(camera),
