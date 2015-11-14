@@ -77,8 +77,8 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	auto mazeScene = Group::create();
 	mazeScene->addCore(shaderPhong);
 	mazeScene->addChild(camera)->addChild(light);
-	for (int i = 0; i < maze::MAZE_SIZE / 2; i++) {
-		for (int j = 0; j < maze::MAZE_SIZE / 2; j++) {
+	for (int i = 0; i < maze::MAZE_SIZE; i++) {
+		for (int j = 0; j < maze::MAZE_SIZE; j++) {
 			light->addChild(cell::createCell(i, j, maze1));
 		}
 	}
