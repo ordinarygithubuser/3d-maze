@@ -66,13 +66,14 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	});
 #else
 	viewer->addController(KeyboardController::create(camera))
-	->addController(MouseController::create(camera));
+		  ->addController(MouseController::create(camera));
 #endif
 	maze::Maze maze1 = maze::generateMaze();
 
 	auto light = Light::create();
 	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
-		 ->setPosition(glm::vec4(10.0f, 10.f, 10.0f, 1.f))->init();
+	       ->setPosition(glm::vec4(10.f, 10.f, 10.f, 1.f))
+	       ->init();
 
 	auto mazeScene = Group::create();
 	mazeScene->addCore(shaderPhong);
