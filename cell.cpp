@@ -30,8 +30,9 @@ GroupSP createCell(int col, int row, maze::Maze m) {
 	ShapeSP wallShapes[4];
 	TransformationSP wallTrans[4];
 	for (int i = 0; i < 4; i++) {
-		wallShapes[i] = Shape::create(wallCore);
+		wallShapes[i] = Shape::create();
 		wallShapes[i]->addCore(matGreen);
+		wallShapes[i]->addCore(wallCore);
 		wallTrans[i] = Transformation::create();
 		wallTrans[i]->addChild(wallShapes[i]);
 		cellGroup->addChild(wallTrans[i]);
