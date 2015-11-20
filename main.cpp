@@ -75,6 +75,7 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 	       ->setPosition(glm::vec4(10.f, 10.f, 10.f, 1.f))
 	       ->init();
 
+	maze::printMaze(maze1);
 	auto mazeScene = Group::create();
 	mazeScene->addCore(shaderPhong);
 	mazeScene->addChild(camera)->addChild(light);
