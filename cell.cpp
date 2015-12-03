@@ -12,19 +12,16 @@ struct WallRenderHelper {
 	bool east = false;
 };
 
-TransformationSP createFloor(int col, int row, GeometryCoreFactory geometryFactory);
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory);
 
 GroupSP createCell(int col, int row, maze::Maze m) {
 	GeometryCoreFactory geometryFactory;
 	auto cellGroup = Group::create();
 
-	auto floorTrans = createFloor(col, row, geometryFactory);
 	// kamera startet auf 0,0. 0,1 ist das feld rechts. 1,0 ist das feld hinter der kamera.
 	auto wallGroup = createWalls(col, row, m, geometryFactory);
 
 	cellGroup->addChild(wallGroup);
-	cellGroup->addChild(floorTrans);
 	return cellGroup;
 }
 
@@ -114,20 +111,22 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	return wallGroup;
 }
 
-TransformationSP createFloor(int col, int row, GeometryCoreFactory geometryFactory) {
+TransformationSP createFloor() {
+	GeometryCoreFactory geometryFactory;
 	auto matYellow = MaterialCore::create();
 	matYellow->setAmbientAndDiffuse(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f))
 				 ->init();
 
 	auto floorTrans = Transformation::create();
 	auto floorShape = Shape::create();
-	auto floorCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH, 0.5f, CELL_WIDTH));
+	auto floorCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH * MAZE_SIZE, 0.5f, CELL_WIDTH * MAZE_SIZE));
 
 	floorShape->addCore(matYellow);
 	floorShape->addCore(floorCore);
 
+	// just done once, don't create temp var
+	auto bla = (MAZE_SIZE * CELL_WIDTH / 2) - (CELL_WIDTH / 2);
 	floorTrans->addChild(floorShape);
-	floorTrans->translate(glm::vec3(col * CELL_WIDTH, 0, row * CELL_WIDTH));
-
+	floorTrans->translate(glm::vec3(bla, 0, bla));
 	return floorTrans;
 }

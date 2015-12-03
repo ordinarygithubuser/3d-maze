@@ -84,5 +84,6 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 			light->addChild(cell::createCell(i, j, maze1));
 		}
 	}
+	light->addChild(cell::createFloor());
 	scene = mazeScene;
 }
