@@ -13,6 +13,7 @@ struct WallRenderHelper {
 };
 
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory);
+void createWall (std::shared_ptr<Transformation>& trans, std::shared_ptr<MaterialCore>& mat, std::shared_ptr<GeometryCore>& geo, std::shared_ptr<Group>& group);
 
 GroupSP createCell(int col, int row, maze::Maze m) {
 	GeometryCoreFactory geometryFactory;
@@ -27,88 +28,83 @@ GroupSP createCell(int col, int row, maze::Maze m) {
 
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory) {
 	auto wallGroup = Group::create();
-
 	auto matGreen = MaterialCore::create();
-	matGreen->setAmbientAndDiffuse(glm::vec4(0.1f, 0.8f, 0.3f, 1.0f))
-			->init();
-	float halfWidth = CELL_WIDTH / 2;
 
+	float halfWidth = CELL_WIDTH / 2;
 	auto wallCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH, halfWidth, 0.5f));
+
+	int dir = m.array[row][col];
+	int top = -1;
+	int right = -1;
+	int left = -1;
+	int bottom = -1;
 
 	WallRenderHelper helper;
 
-	if (row == 0 && col == 0) {
-		helper.wallCount = 4;
-		helper.east = true;
-		helper.west = true;
-		helper.north = true;
-		helper.south = true;
-	} else if (row == 0 && col == maze::MAZE_SIZE - 1) {
-		helper.wallCount = 3;
-		helper.north = true;
-		helper.south = true;
-		helper.east = true;
-	} else if (col == 0) {
-		helper.wallCount = 3;
-		helper.west = true;
-		helper.south = true;
-		helper.east = true;
-	} else {
-		helper.wallCount = 2;
-		helper.south = true;
-		helper.east = true;
-	}
-	int mazeDir = m.array[row][col];
-	if (mazeDir == 1) {
-		if (helper.north) {
-			helper.wallCount = helper.wallCount - 1;
-		}
+	matGreen->setAmbientAndDiffuse(glm::vec4(0.1f, 0.8f, 0.3f, 1.0f))->init();
+	//matRed->setAmbientAndDiffuse(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f))->init();
+	//matBlue->setAmbientAndDiffuse(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))->init();
+
+	helper.east = true;
+	helper.west = true;
+	helper.north = true;
+	helper.south = true;
+
+	// assign direction of surrounding cells to variables top, left, ...
+	if (col + 1 < maze::MAZE_SIZE) right = m.array[row][col+1];
+	if (row + 1 < maze::MAZE_SIZE) top = m.array[row+1][col];
+	if (col - 1 > -1) left = m.array[row][col-1];
+	if (row - 1 > -1) bottom = m.array[row-1][col];
+
+	// If a surrounding cell points to this cell, we remove the wall.
+	if (bottom == maze::NORTH) 	helper.south = false;
+	if (left == maze::EAST) 	helper.west = false;
+	if (right == maze::WEST) 	helper.east = false;
+	if (top == maze::SOUTH) 	helper.north = false;
+	
+	// Now check if we point to a cell and remove the wall UNLESS it's already removed.
+	if (dir == maze::NORTH && helper.north) {
 		helper.north = false;
-	} else if (mazeDir == 2) {
-		if (helper.east) {
-			helper.wallCount = helper.wallCount - 1;
-		}
-		helper.east = false;
-	} else if (mazeDir == 3) {
-		if (helper.south) {
-			helper.wallCount = helper.wallCount - 1;
-		}
-		helper.south = false;
-	} else {
-		if (helper.west) {
-			helper.wallCount = helper.wallCount - 1;
-		}
+	} else if (dir == maze::WEST && helper.west) {
 		helper.west = false;
+	} else if (dir == maze::SOUTH && helper.south) {
+		helper.south = false;
+	} else if (dir == maze::EAST && helper.east) {
+		helper.east = false;
 	}
-	ShapeSP wallShapes[helper.wallCount];
-	TransformationSP wallTrans[helper.wallCount];
-	for (int i = 0; i < helper.wallCount; i++) {
-		wallShapes[i] = Shape::create();
-		wallShapes[i]->addCore(matGreen);
-		wallShapes[i]->addCore(wallCore);
-		wallTrans[i] = Transformation::create();
-		wallTrans[i]->addChild(wallShapes[i]);
-		wallGroup->addChild(wallTrans[i]);
-	}
-	int currentIndex = 0;
+
+	// Now create the walls and apply transformations.
 	if (helper.north) {
-		wallTrans[currentIndex]->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
-		currentIndex++;
+		auto trans = Transformation::create();
+		createWall(trans, matGreen, wallCore, wallGroup);
+		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
 	}
 	if (helper.west) {
-		wallTrans[currentIndex]->translate(glm::vec3(col * CELL_WIDTH - halfWidth, halfWidth / 2, row * CELL_WIDTH))
-							   ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		currentIndex++;
+		auto trans = Transformation::create();
+		createWall(trans, matGreen, wallCore, wallGroup);
+		trans->translate(glm::vec3(col * CELL_WIDTH - halfWidth, halfWidth / 2, row * CELL_WIDTH))
+			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	if (helper.south) {
-		wallTrans[currentIndex]->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
-		currentIndex++;
+		auto trans = Transformation::create();
+		createWall(trans, matGreen, wallCore, wallGroup);
+		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
 	}
 	if (helper.east) {
-		wallTrans[currentIndex]->translate(glm::vec3(col * CELL_WIDTH + halfWidth, halfWidth / 2, row * CELL_WIDTH))
-					->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		auto trans = Transformation::create();
+		createWall(trans, matGreen, wallCore, wallGroup);
+		trans->translate(glm::vec3(col * CELL_WIDTH + halfWidth, halfWidth / 2, row * CELL_WIDTH))
+			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	return wallGroup;
+}
+
+void createWall (std::shared_ptr<Transformation>& trans, std::shared_ptr<MaterialCore>& mat, std::shared_ptr<GeometryCore>& geo, std::shared_ptr<Group>& group) {
+	auto shape = Shape::create();
+	shape->addCore(mat);
+	shape->addCore(geo);
+	trans->addChild(shape);
+	group->addChild(trans);
 }
 
 TransformationSP createFloor() {
@@ -124,9 +120,8 @@ TransformationSP createFloor() {
 	floorShape->addCore(matYellow);
 	floorShape->addCore(floorCore);
 
-	// just done once, don't create temp var
-	auto bla = (MAZE_SIZE * CELL_WIDTH / 2) - (CELL_WIDTH / 2);
+	auto size = (MAZE_SIZE * CELL_WIDTH / 2) - (CELL_WIDTH / 2);
 	floorTrans->addChild(floorShape);
-	floorTrans->translate(glm::vec3(bla, 0, bla));
+	floorTrans->translate(glm::vec3(size, 0, size));
 	return floorTrans;
 }
