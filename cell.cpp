@@ -12,23 +12,30 @@ struct WallRenderHelper {
 	bool east = false;
 };
 
-GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory);
-void createWall (std::shared_ptr<Transformation>& trans, std::shared_ptr<MaterialCore>& mat, std::shared_ptr<GeometryCore>& geo, std::shared_ptr<Group>& group);
+GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader);
+void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, Texture2DCoreSP texture, ShaderCoreSP textureShader);
 
-GroupSP createCell(int col, int row, maze::Maze m) {
+GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 	GeometryCoreFactory geometryFactory;
+	TextureCoreFactory textureFactory("resources/textures");
+
 	auto cellGroup = Group::create();
 
 	// kamera startet auf 0,0. 0,1 ist das feld rechts. 1,0 ist das feld hinter der kamera.
-	auto wallGroup = createWalls(col, row, m, geometryFactory);
+	auto wallGroup = createWalls(col, row, m, geometryFactory, textureFactory, textureShader);
 
 	cellGroup->addChild(wallGroup);
 	return cellGroup;
 }
 
-GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory) {
+GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader) {
 	auto wallGroup = Group::create();
 	auto matGreen = MaterialCore::create();
+	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
+				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	auto matWhite = MaterialCore::create();
+	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))->setSpecular(
+				glm::vec4(0.5f, 0.5f, 0.5f, 1.f))->setShininess(5.f)->init();
 
 	float halfWidth = CELL_WIDTH / 2;
 	auto wallCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH, halfWidth, 0.5f));
@@ -76,32 +83,34 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	// Now create the walls and apply transformations.
 	if (helper.north) {
 		auto trans = Transformation::create();
-		createWall(trans, matGreen, wallCore, wallGroup);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
 	}
 	if (helper.west) {
 		auto trans = Transformation::create();
-		createWall(trans, matGreen, wallCore, wallGroup);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH - halfWidth, halfWidth / 2, row * CELL_WIDTH))
 			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	if (helper.south) {
 		auto trans = Transformation::create();
-		createWall(trans, matGreen, wallCore, wallGroup);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
 	}
 	if (helper.east) {
 		auto trans = Transformation::create();
-		createWall(trans, matGreen, wallCore, wallGroup);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH + halfWidth, halfWidth / 2, row * CELL_WIDTH))
 			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	return wallGroup;
 }
 
-void createWall (std::shared_ptr<Transformation>& trans, std::shared_ptr<MaterialCore>& mat, std::shared_ptr<GeometryCore>& geo, std::shared_ptr<Group>& group) {
+void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, Texture2DCoreSP texture, ShaderCoreSP textureShader) {
 	auto shape = Shape::create();
+	shape->addCore(textureShader);
 	shape->addCore(mat);
+	shape->addCore(texture);
 	shape->addCore(geo);
 	trans->addChild(shape);
 	group->addChild(trans);
