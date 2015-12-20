@@ -13,7 +13,8 @@ struct WallRenderHelper {
 };
 
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader);
-void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, BumpMapCoreSP texture, ShaderCoreSP textureShader);
+void createWall(TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, BumpMapCoreSP texture, ShaderCoreSP textureShader);
+TransformationSP createFloorInternal(int col, int row, GeometryCoreFactory factory, BumpMapCoreSP texture, ShaderCoreSP shader);
 
 GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 	GeometryCoreFactory geometryFactory;
@@ -31,13 +32,13 @@ GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader) {
 	auto wallGroup = Group::create();
 	auto matGreen = MaterialCore::create();
-	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
-				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	auto texBrickBump = textureFactory.createBumpMapFromFiles("brick_texture.png", "brick_normal.png",
+				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	auto texFloorBump = textureFactory.createBumpMapFromFiles("floor_stonetiles.png", "floor_stonetiles_normal.png",
 				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	auto matWhite = MaterialCore::create();
 	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))->setSpecular(
-				glm::vec4(0.5f, 0.5f, 0.5f, 1.f))->setShininess(5.f)->init();
+				glm::vec4(0.1f, 0.1f, 0.1f, 1.f))->setShininess(5.f)->init();
 
 	float halfWidth = CELL_WIDTH / 2;
 	auto wallCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH, halfWidth, 0.5f));
@@ -51,8 +52,6 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	WallRenderHelper helper;
 
 	matGreen->setAmbientAndDiffuse(glm::vec4(0.1f, 0.8f, 0.3f, 1.0f))->init();
-	//matRed->setAmbientAndDiffuse(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f))->init();
-	//matBlue->setAmbientAndDiffuse(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f))->init();
 
 	helper.east = true;
 	helper.west = true;
@@ -105,6 +104,7 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 		trans->translate(glm::vec3(col * CELL_WIDTH + halfWidth, halfWidth / 2, row * CELL_WIDTH))
 			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
+	wallGroup->addChild(createFloorInternal(col, row, geometryFactory, texFloorBump, textureShader));
 	return wallGroup;
 }
 
@@ -118,11 +118,34 @@ void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo,
 	group->addChild(trans);
 }
 
-TransformationSP createFloor() {
+TransformationSP createFloorInternal(int col, int row, GeometryCoreFactory factory, BumpMapCoreSP texture, ShaderCoreSP shader) {
+	auto matWhite = MaterialCore::create();
+	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))
+			->setSpecular(glm::vec4(0.1f, 0.1f, 0.1f, 1.f))
+			->setShininess(5.f)
+			->init();
+
+	auto floorTrans = Transformation::create();
+	auto floorShape = Shape::create();
+	auto floorCore = factory.createCuboid(glm::vec3(CELL_WIDTH, 0.5f, CELL_HEIGHT));
+
+	floorShape->addCore(shader);
+	floorShape->addCore(matWhite);
+	floorShape->addCore(texture);
+	floorShape->addCore(floorCore);
+
+	floorTrans->addChild(floorShape);
+	floorTrans->translate(glm::vec3(col * CELL_WIDTH, 0.0f, row * CELL_HEIGHT));
+
+	return floorTrans;
+}
+
+TransformationSP createFloor(ShaderCoreSP shader) {
 	GeometryCoreFactory geometryFactory;
+
 	auto matYellow = MaterialCore::create();
 	matYellow->setAmbientAndDiffuse(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f))
-				 ->init();
+			 ->init();
 
 	auto floorTrans = Transformation::create();
 	auto floorShape = Shape::create();
