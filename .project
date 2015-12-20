@@ -3,6 +3,7 @@
 	<name>3d-maze</name>
 	<comment></comment>
 	<projects>
+		<project>scg3</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

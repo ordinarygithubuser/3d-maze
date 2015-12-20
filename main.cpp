@@ -74,21 +74,21 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 #endif
 	// camera controllers
 	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(0.f);
+	// Light
+	auto light = Light::create();
+	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
+	     ->setPosition(glm::vec4(0.f, 2.f, 1.f, 1.f))
+	     ->init();
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	viewer->addControllers({
-		KeyboardController::create(camera),
+		MazeKeyboardController::create(camera, light),
 		MouseController::create(camera)
 	});
 #else
-	viewer->addController(KeyboardController::create(camera))
+	viewer->addController(MazeKeyboardController::create(camera, light))
 		  ->addController(MouseController::create(camera));
 #endif
 	maze::Maze maze1 = maze::generateMaze();
-
-	auto light = Light::create();
-	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
-	       ->setPosition(glm::vec4(0.f, 2.f, 1.f, 1.f))
-	       ->init();
 
 	auto mazeScene = Group::create();
 	mazeScene->addCore(shaderPhong);
@@ -98,6 +98,9 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 			light->addChild(cell::createCell(i, j, maze1, shaderBumpTex));
 		}
 	}
+
+
+
 //	light->addChild(cell::createFloor(shaderBumpTex));
 	scene = mazeScene;
 }
