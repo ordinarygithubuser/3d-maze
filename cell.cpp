@@ -13,7 +13,7 @@ struct WallRenderHelper {
 };
 
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader);
-void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, Texture2DCoreSP texture, ShaderCoreSP textureShader);
+void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, BumpMapCoreSP texture, ShaderCoreSP textureShader);
 
 GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 	GeometryCoreFactory geometryFactory;
@@ -32,6 +32,8 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	auto wallGroup = Group::create();
 	auto matGreen = MaterialCore::create();
 	auto texBrick = textureFactory.create2DTextureFromFile("brick_texture.png",
+				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	auto texBrickBump = textureFactory.createBumpMapFromFiles("brick_texture.png", "brick_normal.png",
 				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	auto matWhite = MaterialCore::create();
 	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))->setSpecular(
@@ -83,30 +85,30 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	// Now create the walls and apply transformations.
 	if (helper.north) {
 		auto trans = Transformation::create();
-		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
 	}
 	if (helper.west) {
 		auto trans = Transformation::create();
-		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH - halfWidth, halfWidth / 2, row * CELL_WIDTH))
 			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	if (helper.south) {
 		auto trans = Transformation::create();
-		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
 	}
 	if (helper.east) {
 		auto trans = Transformation::create();
-		createWall(trans, matWhite, wallCore, wallGroup, texBrick, textureShader);
+		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
 		trans->translate(glm::vec3(col * CELL_WIDTH + halfWidth, halfWidth / 2, row * CELL_WIDTH))
 			 ->rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	return wallGroup;
 }
 
-void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, Texture2DCoreSP texture, ShaderCoreSP textureShader) {
+void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, BumpMapCoreSP texture, ShaderCoreSP textureShader) {
 	auto shape = Shape::create();
 	shape->addCore(textureShader);
 	shape->addCore(mat);

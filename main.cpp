@@ -54,13 +54,14 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 
 	// Phong shader with texture mapping
 	auto shaderPhongTex =
-			shaderFactory.createShaderFromSourceFiles(
-					{ ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER),
-							ShaderFile("phong_frag.glsl", GL_FRAGMENT_SHADER),
-							ShaderFile("blinn_phong_lighting.glsl",
-									GL_FRAGMENT_SHADER), ShaderFile(
-									"texture2d_modulate.glsl",
-									GL_FRAGMENT_SHADER) });
+			shaderFactory.createShaderFromSourceFiles({
+				ShaderFile("bump_vert.glsl", GL_VERTEX_SHADER),
+//				ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER),
+//				ShaderFile("phong_frag.glsl", GL_FRAGMENT_SHADER),
+//				ShaderFile("blinn_phong_lighting.glsl",	GL_FRAGMENT_SHADER),
+				ShaderFile("texture2d_modulate.glsl", GL_FRAGMENT_SHADER),
+				ShaderFile("bump_frag.glsl", GL_FRAGMENT_SHADER)
+	});
 #else
 	std::vector<ShaderFile> shaderFiles;
 	shaderFiles.push_back(ShaderFile("simple_gouraud_vert.glsl", GL_VERTEX_SHADER));
@@ -90,7 +91,7 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 
 	auto light = Light::create();
 	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
-	       ->setPosition(glm::vec4(10.f, 50.f, 10.f, 1.f))
+	       ->setPosition(glm::vec4(0.f, 2.f, 1.f, 1.f))
 	       ->init();
 
 	auto mazeScene = Group::create();
