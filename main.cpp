@@ -10,7 +10,7 @@ using namespace scg;
 
 void useCustomizedViewer();
 
-void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene);
+void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP light);
 
 int main() {
 	useCustomizedViewer();
@@ -23,20 +23,26 @@ void useCustomizedViewer() {
 	auto renderer = StandardRenderer::create();
 	viewer->init(renderer)->createWindow("3D Maze", 1024, 768);
 
+	// Light
+	auto light = Light::create();
+	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
+	     ->setPosition(glm::vec4(0.f, 2.f, 1.f, 1.f))
+	     ->init();
+
 	// create camera
-	auto camera = PerspectiveCamera::create();
+	auto camera = MazeCamera::create(light);
 	renderer->setCamera(camera);
 
 	// create scene
 	GroupSP scene;
-	createMazeScene(viewer, camera, scene);
+	createMazeScene(viewer, camera, scene, light);
 	renderer->setScene(scene);
 
 	// start animations, enter main loop
 	viewer->startAnimations()->startMainLoop();
 }
 
-void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
+void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP light) {
 	ShaderCoreFactory shaderFactory("resources/shaders");
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	auto shaderPhong = shaderFactory.createShaderFromSourceFiles({
@@ -74,18 +80,13 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 #endif
 	// camera controllers
 	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(0.f);
-	// Light
-	auto light = Light::create();
-	light->setDiffuseAndSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f))
-	     ->setPosition(glm::vec4(0.f, 2.f, 1.f, 1.f))
-	     ->init();
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	viewer->addControllers({
-		MazeKeyboardController::create(camera, light),
+		KeyboardController::create(camera),
 		MouseController::create(camera)
 	});
 #else
-	viewer->addController(MazeKeyboardController::create(camera, light))
+	viewer->addController(KeyboardController::create(camera))
 		  ->addController(MouseController::create(camera));
 #endif
 	maze::Maze maze1 = maze::generateMaze();
@@ -98,8 +99,6 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene) {
 			light->addChild(cell::createCell(i, j, maze1, shaderBumpTex));
 		}
 	}
-
-
 
 //	light->addChild(cell::createFloor(shaderBumpTex));
 	scene = mazeScene;

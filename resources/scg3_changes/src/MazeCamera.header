@@ -1,0 +1,77 @@
+/**
+ * \file Camera.h
+ * \brief Base class for all cameras (leaf node, abstract).
+ *
+ * \author Volker Ahlers\n
+ *         volker.ahlers@hs-hannover.de
+ */
+
+/*
+ * Copyright 2014 Volker Ahlers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MAZECAMERA_H_
+#define MAZECAMERA_H_
+
+#include "scg_glew.h"
+#include "scg_glm.h"
+#include "scg_internals.h"
+#include "PerspectiveCamera.h"
+
+namespace scg {
+
+
+/**
+ * \brief Base class for all cameras (composite node, abstract).
+ *
+ * Camera offers transformation functions (partly inherited from Transformation) to
+ * change the position and orientation of the camera.
+ * It is possible to add further nodes, including shapes, as children of a camera,
+ * which will be transformed the same way as the camera itself.
+ *
+ * If enabled by setDrawCenterMode(), xyz coordinate axes are drawn at the center point,
+ * i.e., the center of examination (x red, y green, z blue).
+ *
+ * Initial parameters:\n
+ * - center point distace: 1.0\n
+ * - draw center mode: off
+ */
+class MazeCamera: public PerspectiveCamera {
+
+public:
+
+  /**
+   * Constructor.
+   */
+	MazeCamera(LightSP light);
+
+  /**
+   * Destructor.
+   */
+  virtual ~MazeCamera();
+
+  static MazeCameraSP create(LightSP light);
+
+  virtual MazeCamera* translate(glm::vec3 translation);
+
+protected:
+
+  LightSP light_;
+
+};
+
+} /* namespace scg */
+
+#endif /* CAMERA_H_ */

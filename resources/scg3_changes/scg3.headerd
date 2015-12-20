@@ -232,7 +232,7 @@
 #include "src/Light.h"
 #include "src/LightPosition.h"
 #include "src/MaterialCore.h"
-#include "src/MazeKeyboardController.h"
+#include "src/MazeCamera.h"
 #include "src/MouseController.h"
 #include "src/Node.h"
 #include "src/OrthographicCamera.h"
