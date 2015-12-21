@@ -97,7 +97,7 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 	camera->translate(glm::vec3(0.f, 2.f, 1.f))->dolly(0.f);
 #ifdef SCG_CPP11_INITIALIZER_LISTS
 	viewer->addControllers({
-		KeyboardController::create(camera),
+		FirstPersonController::create(camera),
 		MouseController::create(camera)
 	});
 #else

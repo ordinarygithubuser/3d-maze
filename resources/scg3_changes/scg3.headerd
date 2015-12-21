@@ -223,6 +223,7 @@
 #include "src/Controller.h"
 #include "src/Core.h"
 #include "src/CubeMapCore.h"
+#include "src/FirstPersonController.h"
 #include "src/GeometryCore.h"
 #include "src/GeometryCoreFactory.h"
 #include "src/Group.h"

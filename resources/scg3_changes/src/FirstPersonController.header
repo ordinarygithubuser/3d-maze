@@ -1,0 +1,32 @@
+#ifndef FIRSTPERSONCONTROLLER_H_
+#define FIRSTPERSONCONTROLLER_H_
+
+#include "scg_glew.h"
+#include "CameraController.h"
+#include "scg_internals.h"
+
+namespace scg {
+
+/**
+ * \brief A camera controller using keyboard input.
+ *
+ * TODO comment FirstPersonController
+ */
+class FirstPersonController: public CameraController {
+
+public:
+
+  FirstPersonController(CameraSP camera);
+
+  virtual ~FirstPersonController();
+
+  static FirstPersonControllerSP create(CameraSP camera);
+
+  virtual void checkInput(ViewState* viewState);
+
+};
+
+
+}
+
+#endif
