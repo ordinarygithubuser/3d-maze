@@ -4,11 +4,11 @@ achieved:
 - applying bump map textures
 - simple lighting
 - sky box
+- only moving on x + z axis
 
 todo:
 - attach light to camera
 - collision detection
-- only moving on x + z axis
 - goal of the game?
 - culling?
 - shadows?
