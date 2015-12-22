@@ -10,7 +10,7 @@ scg3.
 
 ## maze algorithm
 
-TODO explain Almut / Broder algorithm and maze structure
+TODO explain Aldous / Broder algorithm and maze structure
 
 ## maze rendering
 

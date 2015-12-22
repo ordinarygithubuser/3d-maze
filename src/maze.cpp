@@ -41,8 +41,9 @@ Maze generateMaze () {
 void printMaze (Maze m) {
 	for (int i = 0; i < MAZE_SIZE; i++) {
 		for (int j = 0; j < MAZE_SIZE; j++) {
-			printf("p(%i, %i) = %s\r", i, j, getName(m.array[i][j]));
+			printf("%s | ", getName(m.array[i][j]));
 		}
+		printf("\n");
 	}
 }
 
@@ -56,8 +57,8 @@ int getColDiff (int dir) {
 
 int getRowDiff (int dir) {
 	switch (dir) {
-		case NORTH: return 1;
-		case SOUTH: return -1;
+		case NORTH: return -1;
+		case SOUTH: return 1;
 		default: return 0;
 	}
 }

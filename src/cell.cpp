@@ -31,7 +31,6 @@ GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader) {
 	auto wallGroup = Group::create();
-	auto matGreen = MaterialCore::create();
 	auto texBrickBump = textureFactory.createBumpMapFromFiles("brick_texture.png", "brick_normal.png",
 				GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 	auto texFloorBump = textureFactory.createBumpMapFromFiles("floor_stonetiles.png", "floor_stonetiles_normal.png",
@@ -51,8 +50,6 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 
 	WallRenderHelper helper;
 
-	matGreen->setAmbientAndDiffuse(glm::vec4(0.1f, 0.8f, 0.3f, 1.0f))->init();
-
 	helper.east = true;
 	helper.west = true;
 	helper.north = true;
@@ -60,9 +57,9 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 
 	// assign direction of surrounding cells to variables top, left, ...
 	if (col + 1 < maze::MAZE_SIZE) right = m.array[row][col+1];
-	if (row + 1 < maze::MAZE_SIZE) top = m.array[row+1][col];
+	if (row - 1 > -1) top = m.array[row-1][col];
 	if (col - 1 > -1) left = m.array[row][col-1];
-	if (row - 1 > -1) bottom = m.array[row-1][col];
+	if (row + 1 < maze::MAZE_SIZE) bottom = m.array[row+1][col];
 
 	// If a surrounding cell points to this cell, we remove the wall.
 	if (bottom == maze::NORTH) 	helper.south = false;
@@ -85,7 +82,7 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	if (helper.north) {
 		auto trans = Transformation::create();
 		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
-		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
+		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
 	}
 	if (helper.west) {
 		auto trans = Transformation::create();
@@ -96,7 +93,7 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	if (helper.south) {
 		auto trans = Transformation::create();
 		createWall(trans, matWhite, wallCore, wallGroup, texBrickBump, textureShader);
-		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH - halfWidth));
+		trans->translate(glm::vec3(col * CELL_WIDTH, halfWidth / 2, row * CELL_WIDTH + halfWidth));
 	}
 	if (helper.east) {
 		auto trans = Transformation::create();

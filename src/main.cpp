@@ -137,9 +137,10 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 	mazeScene->addCore(shaderPhong);
 	mazeScene->addChild(camera)->addChild(light);
 	light->addChild(skyboxTrans);
+	maze::printMaze(maze1);
 	for (int i = 0; i < maze::MAZE_SIZE; i++) {
 		for (int j = 0; j < maze::MAZE_SIZE; j++) {
-			light->addChild(cell::createCell(i, j, maze1, shaderBumpTex));
+			light->addChild(cell::createCell(j, i, maze1, shaderBumpTex));
 		}
 	}
 
