@@ -11,6 +11,8 @@ using namespace scg;
 void useCustomizedViewer();
 
 void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& light);
+TransformationSP createSlenderman(GeometryCoreFactory geoFactory, TextureCoreFactory texFactory, ShaderCoreSP shader, MaterialCoreSP mat);
+TransformationSP createSkybox(GeometryCoreFactory geoFactory, TextureCoreFactory texFactory, ShaderCoreSP shader, MaterialCoreSP mat);
 
 int main() {
 	useCustomizedViewer();
@@ -54,6 +56,13 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 		ShaderFile("phong_frag.glsl", GL_FRAGMENT_SHADER),
 		ShaderFile("blinn_phong_lighting.glsl", GL_FRAGMENT_SHADER),
 		ShaderFile("texture_none.glsl", GL_FRAGMENT_SHADER)
+	});
+
+	auto shaderPhongTex = shaderFactory.createShaderFromSourceFiles({
+		ShaderFile("phong_vert.glsl", GL_VERTEX_SHADER),
+		ShaderFile("phong_frag.glsl", GL_FRAGMENT_SHADER),
+		ShaderFile("blinn_phong_lighting.glsl", GL_FRAGMENT_SHADER),
+		ShaderFile("texture2d_modulate.glsl", GL_FRAGMENT_SHADER)
 	});
 
 	// Gouraud shader
@@ -108,14 +117,6 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 
 	GeometryCoreFactory geometryFactory;
 	TextureCoreFactory textureFactory("resources/textures");
-	std::vector<std::string> skyboxFiles;
-	skyboxFiles.push_back("right.png");
-	skyboxFiles.push_back("left.png");
-	skyboxFiles.push_back("up.png");
-	skyboxFiles.push_back("down.png");
-	skyboxFiles.push_back("back.png");
-	skyboxFiles.push_back("front.png");
-	auto texSkybox = textureFactory.createCubeMapFromFiles(skyboxFiles);
 
 	auto matWhite = MaterialCore::create();
 	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))
@@ -123,24 +124,63 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 			->setShininess(5.f)
 			->init();
 
-	auto skyboxTrans = Transformation::create();
-	auto skyboxShape = Shape::create();
-	auto skyboxCore = geometryFactory.createCuboid(glm::vec3(250.f, 250.f, 250.f));
+	auto skyboxTrans = createSkybox(geometryFactory, textureFactory, shaderSkybox, matWhite);
 
-	skyboxShape->addCore(shaderSkybox);
-	skyboxShape->addCore(matWhite);
-	skyboxShape->addCore(texSkybox);
-	skyboxShape->addCore(skyboxCore);
-	skyboxTrans->addChild(skyboxShape);
+	auto slenderTrans = createSlenderman(geometryFactory, textureFactory, shaderPhongTex, matWhite);
 
 	auto mazeScene = Group::create();
 	mazeScene->addCore(shaderPhong);
 	mazeScene->addChild(camera)->addChild(light);
 	light->addChild(skyboxTrans);
+	light->addChild(slenderTrans);
 	for (int i = 0; i < maze::MAZE_SIZE; i++) {
 		for (int j = 0; j < maze::MAZE_SIZE; j++) {
 			light->addChild(cell::createCell(j, i, maze1, shaderBumpTex));
 		}
 	}
 	scene = mazeScene;
+}
+
+/*
+ * Creates the skybox for the scene.
+ */
+TransformationSP createSkybox(GeometryCoreFactory geoFactory, TextureCoreFactory texFactory, ShaderCoreSP shader, MaterialCoreSP mat) {
+	std::vector<std::string> skyboxFiles;
+	skyboxFiles.push_back("right.png");
+	skyboxFiles.push_back("left.png");
+	skyboxFiles.push_back("up.png");
+	skyboxFiles.push_back("down.png");
+	skyboxFiles.push_back("back.png");
+	skyboxFiles.push_back("front.png");
+	auto texSkybox = texFactory.createCubeMapFromFiles(skyboxFiles);
+
+	auto skyboxTrans = Transformation::create();
+	auto skyboxShape = Shape::create();
+	auto skyboxCore = geoFactory.createCuboid(glm::vec3(250.f, 250.f, 250.f));
+
+	skyboxShape->addCore(shader);
+	skyboxShape->addCore(mat);
+	skyboxShape->addCore(texSkybox);
+	skyboxShape->addCore(skyboxCore);
+	skyboxTrans->addChild(skyboxShape);
+	return skyboxTrans;
+}
+
+/*
+ * Creates a slenderman on the opposite side of the maze :)
+ */
+TransformationSP createSlenderman(GeometryCoreFactory geoFactory, TextureCoreFactory texFactory, ShaderCoreSP shader, MaterialCoreSP mat) {
+	auto slenderGeo = geoFactory.createModelFromOBJFile("resources/models/slenderman.obj");
+	auto slenderShape = Shape::create();
+	auto slenderTrans = Transformation::create();
+	auto slenderTexture = texFactory.create2DTextureFromFile("slenderman_tex.png", GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	slenderShape->addCore(shader);
+	slenderShape->addCore(mat);
+	slenderShape->addCore(slenderTexture);
+	slenderShape->addCore(slenderGeo);
+	slenderTrans->addChild(slenderShape);
+	slenderTrans->translate(glm::vec3((MAZE_SIZE - 1) * CELL_WIDTH, 3.0f, (MAZE_SIZE - 1) * CELL_WIDTH));
+	slenderTrans->rotate(180.0f, glm::vec3(0.f, 1.f, 0.f));
+	slenderTrans->scale(glm::vec3(0.008f, 0.008f, 0.008f));
+	return slenderTrans;
 }
