@@ -101,7 +101,7 @@ void createMazeScene(ViewerSP viewer, CameraSP camera, GroupSP& scene, LightSP& 
 		MouseController::create(camera)
 	});
 #else
-	viewer->addController(KeyboardController::create(camera))
+	viewer->addController(FirstPersonController::create(camera))
 		  ->addController(MouseController::create(camera));
 #endif
 	maze::Maze maze1 = maze::generateMaze();
