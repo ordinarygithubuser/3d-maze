@@ -41,9 +41,7 @@ MazeCameraSP MazeCamera::create(LightSP light) {
 MazeCamera* MazeCamera::translate(glm::vec3 translation) {
 	eyePt_ += orientation_ * translation;
 	update_();
-	glm::mat4 newPosition = glm::translate(this->getMatrix(), translation);
-	glm::vec4 newPosVector= glm::vec4(newPosition[0][0], newPosition[1][1], newPosition[2][2], 1.0f);
-	light_->setPosition(newPosVector);
+	light_->setPosition(glm::vec4(this->getPosition(), 1.f));
 	return this;
 }
 

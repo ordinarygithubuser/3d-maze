@@ -5,9 +5,9 @@ achieved:
 - simple lighting
 - sky box
 - only moving on x + z axis
+- attach light to camera
 
 todo:
-- attach light to camera
 - collision detection
 - goal of the game?
 - culling?
