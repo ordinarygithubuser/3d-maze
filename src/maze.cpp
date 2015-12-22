@@ -5,6 +5,12 @@
 #include <algorithm>
 #include "maze.h"
 
+int getColDiff(int dir);
+int getRowDiff(int dir);
+int opposite(int dir);
+char* getName(int dir);
+std::array<int, 4> shuffle();
+
 Maze generateMaze () {
 	srand(time(NULL));
 	Maze m = {{{0}}};
@@ -49,6 +55,9 @@ void printMaze (Maze m) {
 	}
 }
 
+/*
+ * Calculates the column difference, if one moves in the specified direction.
+ */
 int getColDiff (int dir) {
 	switch (dir) {
 		case EAST: return 1;
@@ -57,6 +66,9 @@ int getColDiff (int dir) {
 	}
 }
 
+/*
+ * Calculates the row difference, if one moves in the specified direction.
+ */
 int getRowDiff (int dir) {
 	switch (dir) {
 		case NORTH: return -1;
@@ -65,6 +77,9 @@ int getRowDiff (int dir) {
 	}
 }
 
+/*
+ * Returns the opposite direction of the specified direction.
+ */
 int opposite (int dir) {
 	switch (dir) {
 		case EAST: return WEST;
@@ -75,6 +90,9 @@ int opposite (int dir) {
 	}
 }
 
+/*
+ * Converts each direction constant into a string.
+ */
 char * getName (int dir) {
 	switch (dir) {
 		case EAST: return (char *)"East";
@@ -85,6 +103,9 @@ char * getName (int dir) {
 	}
 }
 
+/*
+ * Shuffles the array of all possible directions and returns the shuffled array.
+ */
 std::array<int, 4> shuffle() {
 	std::array<int, 4> dirs_cpy = MAZE_DIRECTIONS;
     std::random_shuffle(std::begin(dirs_cpy), std::end(dirs_cpy));

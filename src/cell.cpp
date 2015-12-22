@@ -4,6 +4,9 @@
 
 using namespace scg;
 
+/*
+ * Internal structure to know for each cell which walls have to be rendered.
+ */
 struct WallRenderHelper {
 	int wallCount;
 	bool north = false;
@@ -22,13 +25,16 @@ GroupSP createCell(int col, int row, maze::Maze m, ShaderCoreSP textureShader) {
 
 	auto cellGroup = Group::create();
 
-	// kamera startet auf 0,0. 0,1 ist das feld rechts. 1,0 ist das feld hinter der kamera.
 	auto wallGroup = createWalls(col, row, m, geometryFactory, textureFactory, textureShader);
 
 	cellGroup->addChild(wallGroup);
 	return cellGroup;
 }
 
+/*
+ * Method calculates for each individual cell which walls have to be rendered and returns the walls as GroupSP
+ * to be attached to the cell.
+ */
 GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometryFactory, TextureCoreFactory textureFactory, ShaderCoreSP textureShader) {
 	auto wallGroup = Group::create();
 	auto texBrickBump = textureFactory.createBumpMapFromFiles("brick_texture.png", "brick_normal.png",
@@ -68,13 +74,13 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	if (top == maze::SOUTH) 	helper.north = false;
 	
 	// Now check if we point to a cell and remove the wall UNLESS it's already removed.
-	if (dir == maze::NORTH && helper.north) {
+	if (dir == maze::NORTH) {
 		helper.north = false;
-	} else if (dir == maze::WEST && helper.west) {
+	} else if (dir == maze::WEST) {
 		helper.west = false;
-	} else if (dir == maze::SOUTH && helper.south) {
+	} else if (dir == maze::SOUTH) {
 		helper.south = false;
-	} else if (dir == maze::EAST && helper.east) {
+	} else if (dir == maze::EAST) {
 		helper.east = false;
 	}
 
@@ -105,6 +111,9 @@ GroupSP createWalls(int col, int row, maze::Maze m, GeometryCoreFactory geometry
 	return wallGroup;
 }
 
+/*
+ * This method actually creates a single wall with the given cores.
+ */
 void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo, GroupSP group, BumpMapCoreSP texture, ShaderCoreSP textureShader) {
 	auto shape = Shape::create();
 	shape->addCore(textureShader);
@@ -115,6 +124,9 @@ void createWall (TransformationSP trans, MaterialCoreSP mat, GeometryCoreSP geo,
 	group->addChild(trans);
 }
 
+/*
+ * Create a floor for the cell at the given location.
+ */
 TransformationSP createFloorInternal(int col, int row, GeometryCoreFactory factory, BumpMapCoreSP texture, ShaderCoreSP shader) {
 	auto matWhite = MaterialCore::create();
 	matWhite->setAmbientAndDiffuse(glm::vec4(1.f, 1.f, 1.f, 1.f))
@@ -134,25 +146,5 @@ TransformationSP createFloorInternal(int col, int row, GeometryCoreFactory facto
 	floorTrans->addChild(floorShape);
 	floorTrans->translate(glm::vec3(col * CELL_WIDTH, 0.0f, row * CELL_HEIGHT));
 
-	return floorTrans;
-}
-
-TransformationSP createFloor(ShaderCoreSP shader) {
-	GeometryCoreFactory geometryFactory;
-
-	auto matYellow = MaterialCore::create();
-	matYellow->setAmbientAndDiffuse(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f))
-			 ->init();
-
-	auto floorTrans = Transformation::create();
-	auto floorShape = Shape::create();
-	auto floorCore = geometryFactory.createCuboid(glm::vec3(CELL_WIDTH * MAZE_SIZE, 0.5f, CELL_WIDTH * MAZE_SIZE));
-
-	floorShape->addCore(matYellow);
-	floorShape->addCore(floorCore);
-
-	auto size = (MAZE_SIZE * CELL_WIDTH / 2) - (CELL_WIDTH / 2);
-	floorTrans->addChild(floorShape);
-	floorTrans->translate(glm::vec3(size, 0, size));
 	return floorTrans;
 }
