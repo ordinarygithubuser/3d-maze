@@ -25,7 +25,9 @@ Maze generateMaze () {
 			if (nRow > -1 && nRow < MAZE_SIZE && nCol > -1 && nCol < MAZE_SIZE) {
 				// Only mark this, if we were not here
 				if (m.array[nRow][nCol] == 0) {
-					m.array[row][col] = dir;
+					if (m.array[row][col] == 0) {
+						m.array[row][col] = dir;
+					}
 					m.array[nRow][nCol] = opposite(dir);
 					remaining -= 1;
 				}
